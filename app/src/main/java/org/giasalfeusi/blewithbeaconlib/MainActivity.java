@@ -3,26 +3,20 @@ package org.giasalfeusi.blewithbeaconlib;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothGatt;
-import android.bluetooth.BluetoothGattCallback;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
-import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
-import android.widget.ExpandableListView;
 import android.widget.ListView;
 import android.widget.Toast;
 
-import java.util.Iterator;
 import java.util.Observable;
 import java.util.Observer;
-import java.util.Set;
 
 public class MainActivity extends AppCompatActivity implements Observer, AdapterView.OnItemClickListener, View.OnClickListener
 {
@@ -47,6 +41,9 @@ public class MainActivity extends AppCompatActivity implements Observer, Adapter
         setContentView(R.layout.activity_main);
 
         ensureBle();
+
+        long nextTick = Utils.getPrefLong(this, "nextTick");
+        Log.w(TAG, String.format("nextTick is %d", nextTick));
 
         this.sendBroadcast(new Intent("org.giasalfeusi.ble.poll"));
 

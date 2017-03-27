@@ -1,7 +1,10 @@
 package org.giasalfeusi.blewithbeaconlib;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 import java.util.Iterator;
@@ -64,5 +67,41 @@ public class Utils {
         }
         ret += "}";
         return ret;
+    }
+
+    public static void setPref(Context context, String key, String val)
+    {
+        SharedPreferences pref;
+
+        pref = PreferenceManager.getDefaultSharedPreferences(context);
+
+        pref.edit().putString(key, val).commit();
+    }
+
+    public static void setPref(Context context, String key, long val)
+    {
+        SharedPreferences pref;
+
+        pref = PreferenceManager.getDefaultSharedPreferences(context);
+
+        pref.edit().putLong(key, val).commit();
+    }
+
+    public static String getPrefString(Context context, String key)
+    {
+        SharedPreferences pref;
+
+        pref = PreferenceManager.getDefaultSharedPreferences(context);
+
+        return pref.getString(key, "");
+    }
+
+    public static long getPrefLong(Context context, String key)
+    {
+        SharedPreferences pref;
+
+        pref = PreferenceManager.getDefaultSharedPreferences(context);
+
+        return pref.getLong(key, 0);
     }
 }
