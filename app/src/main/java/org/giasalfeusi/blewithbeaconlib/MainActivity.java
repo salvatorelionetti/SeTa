@@ -24,6 +24,8 @@ public class MainActivity extends AppCompatActivity implements Observer, Adapter
 
     private int REQUEST_ENABLE_BT = 1;
 
+    private boolean useBackground = true;
+
     /* M: Model */
     private DevicesList devicesList = null;
 
@@ -45,7 +47,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Adapter
         long nextTick = Utils.getPrefLong(this, "nextTick");
         Log.w(TAG, String.format("nextTick is %d", nextTick));
 
-        this.sendBroadcast(new Intent("org.giasalfeusi.ble.poll"));
+//        this.sendBroadcast(new Intent("org.giasalfeusi.ble.gui"));
 
         sto = SensorTagOrchestrator.singleton();
         DevicesList.addObserver(this);
@@ -67,7 +69,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Adapter
     {
         super.onResume();
         Log.i(TAG, String.format("onResume %s", this));
-        sto.setActivity(this); /* What a wrong if */
+        sto.setContext(this); /* What a wrong if */
     }
 
     @Override
@@ -76,7 +78,8 @@ public class MainActivity extends AppCompatActivity implements Observer, Adapter
         super.onPause();
         Log.i(TAG, String.format("onPause %s", this));
         sto.stopScan();
-        sto.setActivity(null);
+        sto.setContext(null);
+ //       this.sendBroadcast(new Intent("org.giasalfeusi.ble.bg"));
     }
 
     @Override
@@ -124,7 +127,7 @@ public class MainActivity extends AppCompatActivity implements Observer, Adapter
     }
 
     private void startScan() {
-        if (!sto.isEnabled()) {
+        if (!sto.getDeviceHost().isEnabled()) {
             Intent enableBtIntent = new Intent(BluetoothAdapter.ACTION_REQUEST_ENABLE);
             this.startActivityForResult(enableBtIntent, REQUEST_ENABLE_BT);
         } else {
@@ -134,9 +137,9 @@ public class MainActivity extends AppCompatActivity implements Observer, Adapter
 
     public void update(Observable o, Object arg)
     {
-        Toast.makeText(this, "UPDATE CALLED!", Toast.LENGTH_SHORT).show();
-        Log.i("MainActivity.update o", o.toString());
-        Log.i("MainActivity.update arg", arg.toString());
+//        Toast.makeText(this, "UPDATE CALLED!", Toast.LENGTH_SHORT).show();
+        Log.i(TAG, String.format("update o %s", o.toString()));
+        Log.i(TAG, String.format("update arg %s", arg.toString()));
 
         if (adapter != null) {
             adapter.notifyDataSetChanged();

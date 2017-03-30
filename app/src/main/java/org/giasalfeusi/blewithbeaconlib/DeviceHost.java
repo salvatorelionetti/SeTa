@@ -39,24 +39,24 @@ public class DeviceHost {
     private BluetoothGatt mGatt;
 
 
-    public DeviceHost(Activity activity)
+    public DeviceHost(Context context)
     {
         final BluetoothManager bluetoothManager =
-                (BluetoothManager) activity.getSystemService(Context.BLUETOOTH_SERVICE);
+                (BluetoothManager) context.getSystemService(Context.BLUETOOTH_SERVICE);
         mBluetoothAdapter = bluetoothManager.getAdapter();
     }
 
-    Boolean hasBluetoothLE(Activity activity)
+    Boolean hasBluetoothLE(Context context)
     {
         Boolean ret = Boolean.FALSE;
-        if (!activity.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
+        if (!context.getPackageManager().hasSystemFeature(PackageManager.FEATURE_BLUETOOTH_LE)) {
             ret = Boolean.TRUE;
         }
 
         return ret;
     }
 
-    Boolean isEnabled(Activity activity)
+    Boolean isEnabled()
     {
         Boolean ret = Boolean.FALSE;
         if (mBluetoothAdapter != null && mBluetoothAdapter.isEnabled()) {
@@ -66,7 +66,7 @@ public class DeviceHost {
         return ret;
     }
 
-    void startScan(Activity activity, DeviceScanCallBack deviceScanCallBack)
+    void startScan(DeviceScanCallBack deviceScanCallBack)
     {
             if (Build.VERSION.SDK_INT >= 21) {
                 mLEScanner = mBluetoothAdapter.getBluetoothLeScanner();
@@ -78,14 +78,14 @@ public class DeviceHost {
             scanLeDevice(Boolean.TRUE, deviceScanCallBack);
         }
 
-    void stopScan(Activity activity, DeviceScanCallBack deviceScanCallBack)
+    void stopScan(DeviceScanCallBack deviceScanCallBack)
     {
         if (mBluetoothAdapter != null && mBluetoothAdapter.isEnabled()) {
             scanLeDevice(Boolean.FALSE, deviceScanCallBack);
         }
     }
 
-    void exiting(Activity activity)
+    void exiting()
     {
         if (mGatt == null) {
             return;

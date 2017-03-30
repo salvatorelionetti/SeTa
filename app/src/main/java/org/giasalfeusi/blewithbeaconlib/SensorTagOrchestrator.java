@@ -1,8 +1,6 @@
 package org.giasalfeusi.blewithbeaconlib;
 
-import android.app.Activity;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothGatt;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.content.Context;
@@ -12,8 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Observer;
 import java.util.UUID;
-
-import static org.giasalfeusi.blewithbeaconlib.DevicesList.getDevices;
 
 /**
  * Created by salvy on 17/03/17.
@@ -25,7 +21,7 @@ public class SensorTagOrchestrator {
 
     private DeviceScanCallBack deviceScanCallBack;
     private DeviceHost deviceHost;
-    private Activity activity; // AAARGH!
+    private Context context; // AAARGH!
     private HashMap<BluetoothDevice, DeviceWithObservers> deviceWithObserversMap;
     private HashMap<String,CharacteristicDes> conf;
 
@@ -45,27 +41,24 @@ public class SensorTagOrchestrator {
         deviceWithObserversMap = new HashMap<BluetoothDevice, DeviceWithObservers>();
     }
 
-    public void setActivity(Activity act)
+    public void setContext(Context _context)
     {
-        activity = act;
-        if (deviceHost == null) {
-            deviceHost = new DeviceHost(activity);
+        context = _context;
+        if (deviceHost == null && _context != null) {
+            deviceHost = new DeviceHost(_context);
         }
     }
 
-    public boolean isEnabled()
-    {
-        return deviceHost.isEnabled(activity);
-    }
+    public DeviceHost getDeviceHost() { return deviceHost; }
 
     public void startScan()
     {
-        deviceHost.startScan(activity, deviceScanCallBack);
+        deviceHost.startScan(deviceScanCallBack);
     }
 
     public void stopScan()
     {
-        deviceHost.stopScan(activity, deviceScanCallBack);
+        deviceHost.stopScan(deviceScanCallBack);
     }
 
     public void connectToDevice(BluetoothDevice blueDev)
@@ -73,7 +66,7 @@ public class SensorTagOrchestrator {
         DeviceWithObservers dwo = deviceWithObserversMap.get(blueDev);
         if (dwo != null)
         {
-            blueDev.connectGatt(activity, false, dwo);
+            blueDev.connectGatt(context, false, dwo);
             stopScan();
         }
     }
@@ -120,7 +113,7 @@ public class SensorTagOrchestrator {
         {
             Log.i(TAG, String.format("noMoreObserve %s<=%s:", blueDev.getAddress(), observer));
             dwo.deleteObserver(observer);
-            deviceWithObserversMap.remove(blueDev);
+            //deviceWithObserversMap.remove(blueDev);
         }
     }
 
@@ -141,6 +134,46 @@ public class SensorTagOrchestrator {
             ret = dwo.getGattConnection().readCharacteristic(ch);
             if (!ret) {
                 Log.e(TAG, String.format("readChar Failed for dev %s %s", blueDev.getAddress(), ch.getUuid()));
+            }
+        }
+
+        return ret;
+    }
+
+    public BluetoothGattCharacteristic getCharacteristic(BluetoothDevice blueDev, String uuid) {
+
+        BluetoothGattCharacteristic ret = null;
+
+        DeviceWithObservers dwo = deviceWithObserversMap.get(blueDev);
+        Log.d(TAG, String.format("getChar dwo = %s", dwo));
+        if (dwo != null && dwo.getGattConnection() != null) {
+            /* Lookup Characteristic */
+            for (BluetoothGattCharacteristic gattCh: dwo.getCharacteristicsList())
+            {
+                if (gattCh.getUuid().compareTo(UUID.fromString(uuid)) == 0)
+                {
+                    ret = gattCh;
+                }
+            }
+        }
+
+        return ret;
+    }
+
+    public boolean readCharacteristic(BluetoothDevice blueDev, String uuid) {
+
+        boolean ret = false;
+
+        DeviceWithObservers dwo = deviceWithObserversMap.get(blueDev);
+        if (dwo != null && dwo.getGattConnection() != null) {
+            /* Lookup Characteristic */
+            BluetoothGattCharacteristic gattCh = getCharacteristic(blueDev, uuid);
+
+            if (gattCh != null) {
+                ret = dwo.getGattConnection().readCharacteristic(gattCh);
+                if (!ret) {
+                    Log.e(TAG, String.format("readChar Failed for dev %s %s", blueDev.getAddress(), gattCh.getUuid()));
+                }
             }
         }
 

@@ -4,6 +4,7 @@ import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothGattCharacteristic;
 import android.bluetooth.BluetoothGattService;
 import android.bluetooth.BluetoothProfile;
+import android.content.Intent;
 import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
@@ -100,7 +101,7 @@ public class Main2Activity extends AppCompatActivity implements Observer, Adapte
     {
         super.onResume();
         Log.i(TAG, String.format("onResume %s", this));
-        sto.setActivity(this); /* What a wrong if */
+        sto.setContext(this); /* What a wrong if */
         sto.observeDevice(deviceObj, this);
         sto.connectToDevice(deviceObj);
     }
@@ -110,8 +111,8 @@ public class Main2Activity extends AppCompatActivity implements Observer, Adapte
     {
         super.onPause();
         Log.i(TAG, String.format("onPause %s", this));
-        sto.disconnectFromDevice(deviceObj);
-        sto.setActivity(null); /* What a wrong if */
+        //sto.disconnectFromDevice(deviceObj);
+        sto.setContext(null); /* What a wrong if */
         sto.noMoreObserveDevice(deviceObj, this);
     }
 
@@ -142,6 +143,12 @@ public class Main2Activity extends AppCompatActivity implements Observer, Adapte
                                 imageView.setImageResource(R.drawable.ic_bluetooth_connected_black_24dp);
                                 pref.edit().putString("devName", deviceObj.getName()).commit();
                                 pref.edit().putString("devAddr", deviceObj.getAddress()).commit();
+
+                                /* Start bg T sampling */
+                                Intent bgPollIntent = new Intent("org.giasalfeusi.ble.poll");
+                                bgPollIntent.putExtra("deviceObject", deviceObj);
+                                Main2Activity.this.sendBroadcast(bgPollIntent);
+
                                 break;
                             case BluetoothProfile.STATE_DISCONNECTED:
                                 imageView.setImageResource(R.drawable.ic_bluetooth_black_24dp);
